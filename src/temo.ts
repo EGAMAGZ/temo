@@ -5,6 +5,7 @@ export type Theme = "light" | "dark";
 export interface TemoConfigInit {
   autoDetect?: boolean;
   defaultTheme?: Theme;
+  storageKey?: string;
   onThemeChange?: (theme: Theme) => void;
 }
 
@@ -16,11 +17,45 @@ export class Temo {
 
   private constructor(config: Required<TemoConfigInit>) {
     this.config = config;
-    this.currentTheme = config.defaultTheme;
+    this.currentTheme = this.resolveInitTheme();
+
+    if (this.config.autoDetect) {
+      this.setupAutoDetection();
+    }
   }
 
-  private applyTheme(theme: Theme) {
+  private resolveInitTheme(): Theme {
+    const storedTheme = localStorage.getItem(this.config.storageKey) as
+      | Theme
+      | null;
+    if (storedTheme) return storedTheme;
+
+    if (this.config.autoDetect) {
+      const prefersDark =
+        globalThis.matchMedia("(prefers-color-scheme: dark)").matches;
+      return prefersDark ? "dark" : "light";
+    }
+
+    return this.config.defaultTheme;
+  }
+
+  private setTheme(theme: Theme): void {
+    this.currentTheme = theme;
     document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(this.config.storageKey, theme);
+    this.config.onThemeChange?.(theme);
+  }
+
+  private setupAutoDetection(): void {
+    const mediaQuery = globalThis.matchMedia("(prefers-color-scheme: dark)");
+    const listener = (e: MediaQueryListEvent) => {
+      const newTheme = e.matches ? "dark" : "light";
+      this.setTheme(newTheme);
+    };
+
+    mediaQuery.addEventListener("change", listener, {
+      signal: this.abortController.signal,
+    });
   }
 
   public static init(
@@ -31,11 +66,13 @@ export class Temo {
         autoDetect = true,
         defaultTheme = "light",
         onThemeChange = () => {},
+        storageKey = "theme",
       } = config;
       Temo.instance = new Temo({
         autoDetect,
         defaultTheme,
         onThemeChange,
+        storageKey,
       });
     }
 
@@ -59,11 +96,11 @@ export class Temo {
       signal: this.abortController.signal,
     });
   }
+
   public toggle() {
-    this.currentTheme = this.currentTheme === "light" ? "dark" : "light";
-    this.applyTheme(this.currentTheme);
-    this.config.onThemeChange(this.currentTheme);
+    this.setTheme(this.currentTheme === "light" ? "dark" : "light");
   }
+
   public destroy() {
     this.abortController.abort();
   }
