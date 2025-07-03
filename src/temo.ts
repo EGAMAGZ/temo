@@ -1,6 +1,7 @@
 const ID_ELEMENT_REGEX = /^#[^#\s]+$/;
 
 export type Theme = "light" | "dark";
+export type Selector = `#{string}`;
 
 export interface TemoConfigInit {
   autoDetect?: boolean;
@@ -36,7 +37,7 @@ export class Temo {
   private config: Required<TemoConfigInit>;
 
   /**
-   * @param config - The configuration object for Temo (all required).
+   * @param {Required<TemoConfigInit>} config - The configuration object for Temo (all required).
    */
   private constructor(config: Required<TemoConfigInit>) {
     this.config = config;
@@ -64,7 +65,7 @@ export class Temo {
 
   /**
    * Sets the current theme, updates DOM and storage, and triggers callback.
-   * @param theme - The theme to set.
+   * @param {Theme} theme - The theme to set.
    */
   private setTheme(theme: Theme): void {
     this.currentTheme = theme;
@@ -90,8 +91,8 @@ export class Temo {
 
   /**
    * Initializes the Temo singleton with the given configuration.
-   * @param config - Partial configuration for Temo.
-   * @returns The Temo instance.
+   * @param {TemoConfigInit} config - Partial configuration for Temo.
+   * @returns {this} The Temo instance.
    */
   public static init(config: TemoConfigInit): Temo {
     if (!Temo.instance) {
@@ -114,9 +115,9 @@ export class Temo {
 
   /**
    * Binds a click event to the element with the given ID selector to toggle theme.
-   * @param buttonSelector - The ID selector (e.g., '#toggleBtn').
+   * @param {Selector} buttonSelector - The ID selector (e.g., '#toggleBtn').
    */
-  public bindToggle(buttonSelector: string): void {
+  public bindToggle(buttonSelector: Selector): void {
     const trimmedSelector = buttonSelector.trim();
     if (!ID_ELEMENT_REGEX.test(trimmedSelector)) {
       throw new Error(
