@@ -1,3 +1,5 @@
+const ID_ELEMENT_REGEX = /^#[^#\s]+$/;
+
 export type Theme = "light" | "dark";
 
 export interface TemoConfigInit {
@@ -7,23 +9,29 @@ export interface TemoConfigInit {
 }
 
 export class Temo {
-  private buttonIds: string[] = [];
-  static instance: Temo;
+  private abortController = new AbortController();
+  private static instance: Temo;
+  private currentTheme: Theme;
+  private config: Required<TemoConfigInit>;
 
-  private config: TemoConfigInit;
-
-  private constructor(config: TemoConfigInit) {
+  private constructor(config: Required<TemoConfigInit>) {
     this.config = config;
+    this.currentTheme = config.defaultTheme;
+  }
+
+  private applyTheme(theme: Theme) {
+    document.documentElement.setAttribute("data-theme", theme);
   }
 
   public static init(
-    {
-      autoDetect = true,
-      defaultTheme = "light",
-      onThemeChange = (_theme: Theme) => {},
-    }: TemoConfigInit,
+    config: TemoConfigInit,
   ): Temo {
     if (!Temo.instance) {
+      const {
+        autoDetect = true,
+        defaultTheme = "light",
+        onThemeChange = () => {},
+      } = config;
       Temo.instance = new Temo({
         autoDetect,
         defaultTheme,
@@ -34,11 +42,29 @@ export class Temo {
     return Temo.instance;
   }
 
-  bindToggle(buttonId: string) {
-    if (/^#[^#\s]+$/.test(buttonId)) throw new Error("Invalid");
+  bindToggle(buttonSelector: string) {
+    if (!ID_ELEMENT_REGEX.test(buttonSelector.trim())) {
+      throw new Error(
+        `Element with ID '${buttonSelector}' not found in the DOM.`,
+      );
+    }
 
-    if (this.buttonIds.includes(buttonId)) throw new Error("Binding");
+    const elementId = buttonSelector.trim().slice(1);
+    const element = document.getElementById(elementId);
+    if (!element) {
+      throw new Error(`Element with ID '${elementId}' not found in the DOM.`);
+    }
+
+    element.addEventListener("click", () => this.toggle(), {
+      signal: this.abortController.signal,
+    });
   }
-  toggle() {
+  public toggle() {
+    this.currentTheme = this.currentTheme === "light" ? "dark" : "light";
+    this.applyTheme(this.currentTheme);
+    this.config.onThemeChange(this.currentTheme);
+  }
+  public destroy() {
+    this.abortController.abort();
   }
 }
