@@ -27,6 +27,7 @@ export interface TemoConfigInit {
  * temo.toggle();
  *
  * temo.destroy();
+ * ```
  */
 export class Temo {
   private abortController = new AbortController();
