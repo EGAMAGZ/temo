@@ -32,3 +32,10 @@ bunx jsr add @egamagz/temo
 Check the [JSR page for more details](https://jsr.io/@egamagz/temo).
 
 
+## Features
+
+## Example
+
+## License
+
+MIT License

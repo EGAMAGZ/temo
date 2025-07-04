@@ -1,6 +1,7 @@
 {
   "name": "@egamagz/temo",
   "exports": "./src/mod.ts",
+  "license": "MIT",
   "tasks": {
     "dev": "deno run --watch main.ts"
   },
