@@ -52,11 +52,14 @@ export class Temo {
    * Determines the initial theme based on storage, auto-detection, or default.
    */
   private resolveInitTheme(): Theme {
-    const storedTheme = localStorage.getItem(this.config.storageKey) as Theme | null;
+    const storedTheme = localStorage.getItem(this.config.storageKey) as
+      | Theme
+      | null;
     if (storedTheme) return storedTheme;
 
     if (this.config.autoDetect) {
-      const prefersDark = globalThis.matchMedia("(prefers-color-scheme: dark)").matches;
+      const prefersDark =
+        globalThis.matchMedia("(prefers-color-scheme: dark)").matches;
       return prefersDark ? "dark" : "light";
     }
 
@@ -99,7 +102,7 @@ export class Temo {
       const {
         autoDetect = true,
         defaultTheme = "light",
-        onThemeChange = () => { },
+        onThemeChange = () => {},
         storageKey = "theme",
       } = config;
       Temo.instance = new Temo({
@@ -121,7 +124,7 @@ export class Temo {
     const trimmedSelector = buttonSelector.trim();
     if (!ID_ELEMENT_REGEX.test(trimmedSelector)) {
       throw new Error(
-        `Invalid selector '${buttonSelector}'. Only ID selectors (e.g., '#id') are supported.`
+        `Invalid selector '${buttonSelector}'. Only ID selectors (e.g., '#id') are supported.`,
       );
     }
 
