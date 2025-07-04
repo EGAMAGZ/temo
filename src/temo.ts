@@ -1,7 +1,7 @@
 const ID_ELEMENT_REGEX = /^#[^#\s]+$/;
 
 export type Theme = "light" | "dark";
-export type Selector = `#{string}`;
+export type Selector = `#${string}`;
 
 export interface TemoConfigInit {
   autoDetect?: boolean;
