@@ -1,12 +1,43 @@
 const ID_ELEMENT_REGEX = /^#[^#\s]+$/;
 
+/**
+ * Represents the available theme options for the application.
+ */
 export type Theme = "light" | "dark";
+
+/**
+ * Represents a CSS ID selector string that starts with '#'.
+ * Used for selecting DOM elements by their ID attribute.
+ */
 export type Selector = `#${string}`;
 
+/**
+ * Configuration interface for initializing the Temo theme manager.
+ * All properties are optional and have sensible defaults.
+ */
 export interface TemoConfigInit {
+  /**
+   * Whether to automatically detect and sync with the user's system theme preference.
+   * @default true
+   */
   autoDetect?: boolean;
+  
+  /**
+   * The default theme to use when no theme is stored and auto-detection is disabled.
+   * @default "light"
+   */
   defaultTheme?: Theme;
+  
+  /**
+   * The key used to store the current theme in localStorage.
+   * @default "theme"
+   */
   storageKey?: string;
+  
+  /**
+   * Callback function that is called whenever the theme changes.
+   * @param theme - The new theme that was applied
+   */
   onThemeChange?: (theme: Theme) => void;
 }
 
