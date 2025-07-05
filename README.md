@@ -1,5 +1,8 @@
 # Temo
 
+Temo is a minimal and intuitive JavaScript/TypeScript library for managing
+light/dark themes in web applications.
+
 [![JSR](https://jsr.io/badges/@egamagz/temo)](https://jsr.io/@egamagz/temo)
 [![JSR Score](https://jsr.io/badges/@egamagz/temo/score)](https://jsr.io/@egamagz/temo/score)
 ![GitHub License](https://img.shields.io/github/license/egamagz/temo)
