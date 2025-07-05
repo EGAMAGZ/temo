@@ -21,19 +21,19 @@ export interface TemoConfigInit {
    * @default true
    */
   autoDetect?: boolean;
-  
+
   /**
    * The default theme to use when no theme is stored and auto-detection is disabled.
    * @default "light"
    */
   defaultTheme?: Theme;
-  
+
   /**
    * The key used to store the current theme in localStorage.
    * @default "theme"
    */
   storageKey?: string;
-  
+
   /**
    * Callback function that is called whenever the theme changes.
    * @param theme - The new theme that was applied
