@@ -42,6 +42,7 @@ export class Temo {
   private constructor(config: Required<TemoConfigInit>) {
     this.config = config;
     this.currentTheme = this.resolveInitTheme();
+    this.setTheme(this.currentTheme);
 
     if (this.config.autoDetect) {
       this.setupAutoDetection();
