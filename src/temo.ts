@@ -100,14 +100,15 @@ export class Temo {
    * @param {TemoConfigInit} config - Partial configuration for Temo.
    * @returns {this} The Temo instance.
    */
-  public static init(config: TemoConfigInit): Temo {
+  public static init(
+    {
+      autoDetect = true,
+      defaultTheme = "light",
+      onThemeChange = () => {},
+      storageKey = "theme",
+    }: TemoConfigInit = {},
+  ): Temo {
     if (!Temo.instance) {
-      const {
-        autoDetect = true,
-        defaultTheme = "light",
-        onThemeChange = () => {},
-        storageKey = "theme",
-      } = config;
       Temo.instance = new Temo({
         autoDetect,
         defaultTheme,
