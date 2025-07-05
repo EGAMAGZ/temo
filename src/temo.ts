@@ -14,6 +14,8 @@ export interface TemoConfigInit {
  * Temo - Theme manager for toggling between light and dark modes.
  * @example
  * ```ts
+ * // HTML: <button id="toggleBtn">Toggle Theme</button>
+ *
  * const temo = Temo.init({
  *   autoDetect: true,
  *   defaultTheme: "light",
@@ -23,7 +25,7 @@ export interface TemoConfigInit {
  *   },
  * });
  *
- * temo.bindToggle("#toggleBtn");
+ * temo.bindToggle("#toggleBtn"); // Only works with button elements
  *
  * temo.toggle();
  *
@@ -118,8 +120,9 @@ export class Temo {
   }
 
   /**
-   * Binds a click event to the element with the given ID selector to toggle theme.
-   * @param {Selector} buttonSelector - The ID selector (e.g., '#toggleBtn').
+   * Binds a click event to the button element with the given ID selector to toggle theme.
+   * @param {Selector} buttonSelector - The ID selector for a button element (e.g., '#toggleBtn').
+   * @throws {Error} If the selector is invalid, element is not found, or element is not a button.
    */
   public bindToggle(buttonSelector: Selector): void {
     const trimmedSelector = buttonSelector.trim();
@@ -133,6 +136,12 @@ export class Temo {
     const element = document.getElementById(elementId);
     if (!element) {
       throw new Error(`Element with ID '${elementId}' not found in the DOM.`);
+    }
+
+    if (element.tagName.toLowerCase() !== "button") {
+      throw new Error(
+        `Element with ID '${elementId}' is not a button element. Only button elements are supported.`,
+      );
     }
 
     element.addEventListener("click", () => this.toggle(), {
