@@ -9,7 +9,7 @@ jobs:
     name: Run tests
     permissions:
       contents: write
-    uses: ./.github/workflows/test.yaml
+    uses: ./.github/workflows/test.yml
 
   check-linting:
     name: Check linting
