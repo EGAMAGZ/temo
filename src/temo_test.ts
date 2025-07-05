@@ -1,6 +1,6 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { beforeEach, describe, it } from "@std/testing/bdd";
-import { Temo, Theme } from "./temo.ts";
+import { type Selector, Temo, type Theme } from "./temo.ts";
 
 // Create a simple mock documentElement with attribute tracking
 const mockDocumentElement = {
@@ -13,10 +13,15 @@ const mockDocumentElement = {
   },
 };
 
+// Define event listener type
+type EventListener = () => void;
+
 // Simple mock elements that can hold event listeners
 class MockElement {
-  private _listeners: Record<string, { fn: Function; signal?: AbortSignal }[]> =
-    {};
+  private _listeners: Record<
+    string,
+    { fn: EventListener; signal?: AbortSignal }[]
+  > = {};
   private _id = "";
   private _tagName = "";
 
@@ -39,7 +44,7 @@ class MockElement {
 
   addEventListener(
     type: string,
-    listener: Function,
+    listener: EventListener,
     options?: { signal?: AbortSignal },
   ) {
     if (!this._listeners[type]) {
@@ -61,13 +66,13 @@ class MockElement {
       }
 
       // Add abort listener (simplified mock)
-      (options.signal as any)._abortListeners =
-        (options.signal as any)._abortListeners || [];
-      (options.signal as any)._abortListeners.push(abortHandler);
+      const signal = options.signal as unknown as MockAbortSignal;
+      signal._abortListeners = signal._abortListeners || [];
+      signal._abortListeners.push(abortHandler);
     }
   }
 
-  removeEventListener(type: string, listener: Function) {
+  removeEventListener(type: string, listener: EventListener) {
     if (this._listeners[type]) {
       this._listeners[type] = this._listeners[type].filter((entry) =>
         entry.fn !== listener
@@ -118,7 +123,9 @@ const mockDocument = {
   },
 };
 
-(globalThis as any).document = mockDocument;
+// Type assertion to extend globalThis
+(globalThis as unknown as { document: typeof mockDocument }).document =
+  mockDocument;
 
 // Mock AbortController
 class MockAbortController {
@@ -135,21 +142,22 @@ class MockAbortController {
 
 class MockAbortSignal {
   aborted = false;
-  private _abortListeners: Function[] = [];
+  _abortListeners: EventListener[] = [];
 
   abort() {
     this.aborted = true;
     this._abortListeners.forEach((listener) => listener());
   }
 
-  addEventListener(type: string, listener: Function) {
+  addEventListener(type: string, listener: EventListener) {
     if (type === "abort") {
       this._abortListeners.push(listener);
     }
   }
 }
 
-(globalThis as any).AbortController = MockAbortController;
+(globalThis as unknown as { AbortController: typeof MockAbortController })
+  .AbortController = MockAbortController;
 
 // Mocking localStorage
 class LocalStorageMock {
@@ -182,15 +190,15 @@ class MediaQueryListMock {
   constructor(public matches: boolean) {}
 
   addEventListener(
-    type: string,
+    _type: string,
     listener: (e: MediaQueryListEvent) => void,
-    options?: any,
+    _options?: { signal?: AbortSignal },
   ) {
     this.listeners.push(listener);
   }
 
   removeEventListener(
-    type: string,
+    _type: string,
     listener: (e: MediaQueryListEvent) => void,
   ) {
     const index = this.listeners.indexOf(listener);
@@ -207,11 +215,12 @@ class MediaQueryListMock {
 let mockMediaQuery: MediaQueryListMock;
 let prefersDark = false; // Default to light theme
 
-(globalThis as any).matchMedia = (query: string) => {
-  const matches = query.includes("dark") && prefersDark;
-  mockMediaQuery = new MediaQueryListMock(matches);
-  return mockMediaQuery;
-};
+(globalThis as unknown as { matchMedia: (query: string) => MediaQueryListMock })
+  .matchMedia = (query: string) => {
+    const matches = query.includes("dark") && prefersDark;
+    mockMediaQuery = new MediaQueryListMock(matches);
+    return mockMediaQuery;
+  };
 
 const mockLocalStorage = new LocalStorageMock();
 
@@ -228,7 +237,7 @@ describe("Temo", () => {
     mockLocalStorage.clear();
 
     // Clear any existing Temo instance
-    (Temo as any).instance = null;
+    (Temo as unknown as { instance: Temo | null }).instance = null;
 
     // Clear mock elements and reset documentElement attributes
     Object.keys(mockElements).forEach((key) => delete mockElements[key]);
@@ -251,7 +260,7 @@ describe("Temo", () => {
 
   it("should initialize with stored theme when available", () => {
     globalThis.localStorage.setItem("theme", "dark");
-    const temo = Temo.init({
+    const _temo = Temo.init({
       defaultTheme: "light",
       storageKey: "theme",
       autoDetect: false,
@@ -336,7 +345,7 @@ describe("Temo", () => {
     });
 
     assertThrows(
-      () => temo.bindToggle(".invalid" as any),
+      () => temo.bindToggle(".invalid" as Selector),
       Error,
       "Invalid selector '.invalid'. Only ID selectors (e.g., '#id') are supported.",
     );
@@ -417,7 +426,7 @@ describe("Temo", () => {
 
   it("should use custom storage key", () => {
     const customKey = "custom-theme-key";
-    const temo = Temo.init({
+    const _temo = Temo.init({
       defaultTheme: "dark",
       storageKey: customKey,
       autoDetect: false,
@@ -476,7 +485,7 @@ describe("Temo", () => {
 
   it("should auto-detect dark theme preference and handle media query changes", () => {
     prefersDark = true; // Set mock to prefer dark theme
-    const temo = Temo.init({
+    const _temo = Temo.init({
       autoDetect: true,
       storageKey: "theme",
       defaultTheme: "light",
